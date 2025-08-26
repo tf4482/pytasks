@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import sys
 import sqlite3
 import os
@@ -19,7 +20,7 @@ def init_database():
     db_path = get_database_path()
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,7 +28,7 @@ def init_database():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    
+
     conn.commit()
     conn.close()
 
@@ -37,12 +38,12 @@ def store_task(task_string):
     db_path = get_database_path()
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    
+
     cursor.execute(
         "INSERT INTO tasks (task_string) VALUES (?)",
         (task_string,)
     )
-    
+
     conn.commit()
     conn.close()
     print(f"Task stored: {task_string}")
@@ -51,25 +52,25 @@ def store_task(task_string):
 def list_tasks():
     """List all stored tasks from the database."""
     db_path = get_database_path()
-    
+
     if not db_path.exists():
         print("No tasks found.")
         return
-    
+
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    
+
     cursor.execute(
         "SELECT id, task_string, created_at FROM tasks ORDER BY created_at DESC"
     )
-    
+
     tasks = cursor.fetchall()
     conn.close()
-    
+
     if not tasks:
         print("No tasks found.")
         return
-    
+
     print("Stored tasks:")
     print("-" * 60)
     for task_id, task_string, created_at in tasks:
@@ -79,21 +80,60 @@ def list_tasks():
         print(f"[{task_id:3d}] {formatted_time} | {task_string}")
 
 
+def delete_task(task_id):
+    """Delete a task by its ID."""
+    db_path = get_database_path()
+
+    if not db_path.exists():
+        print("No tasks found.")
+        return
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # First check if the task exists
+    cursor.execute("SELECT task_string FROM tasks WHERE id = ?", (task_id,))
+    task = cursor.fetchone()
+
+    if not task:
+        print(f"Task with ID {task_id} not found.")
+        conn.close()
+        return
+
+    # Delete the task
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    conn.commit()
+    conn.close()
+
+    print(f"Task deleted: [{task_id}] {task[0]}")
+
+
 def main():
     """Main function to handle command line arguments."""
     if len(sys.argv) < 2:
         print("Usage: python main.py <task_string>")
         print("       python main.py ls")
+        print("       python main.py rm <id>")
         sys.exit(1)
-    
+
     # Initialize database
     init_database()
-    
+
     # Get the argument
     argument = sys.argv[1]
-    
+
     if argument == "ls":
         list_tasks()
+    elif argument == "rm":
+        if len(sys.argv) < 3:
+            print("Usage: python main.py rm <id>")
+            sys.exit(1)
+        try:
+            task_id = int(sys.argv[2])
+            delete_task(task_id)
+        except ValueError:
+            print("Error: ID must be a number")
+            sys.exit(1)
     else:
         # Join all arguments after the first one to allow multi-word tasks
         task_string = " ".join(sys.argv[1:])
