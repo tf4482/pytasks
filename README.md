@@ -10,17 +10,17 @@ Simple command line tool to store and list tasks as strings in SQLite database.
 
 📥 **Store a task:**
 ```bash
-python3 main.py "your task here"
+python3 pytasks.py "your task here"
 ```
 
 📋 **List all tasks:**
 ```bash
-python3 main.py ls
+python3 pytasks.py ls
 ```
 
 🗑️ **Delete a task by ID:**
 ```bash
-python3 main.py rm <id>
+python3 pytasks.py rm <id>
 ```
 
 🗄️ Database stored in `~/.pytasks/tasks.db`
