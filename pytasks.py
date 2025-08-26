@@ -111,9 +111,9 @@ def delete_task(task_id):
 def main():
     """Main function to handle command line arguments."""
     if len(sys.argv) < 2:
-        print("Usage: python main.py <task_string>")
-        print("       python main.py ls")
-        print("       python main.py rm <id>")
+        print("Usage: python pytasks.py <task_string>")
+        print("       python pytasks.py ls")
+        print("       python pytasks.py rm <id>")
         sys.exit(1)
 
     # Initialize database
@@ -126,7 +126,7 @@ def main():
         list_tasks()
     elif argument == "rm":
         if len(sys.argv) < 3:
-            print("Usage: python main.py rm <id>")
+            print("Usage: python pytasks.py rm <id>")
             sys.exit(1)
         try:
             task_id = int(sys.argv[2])
